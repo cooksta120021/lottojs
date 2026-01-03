@@ -1,19 +1,12 @@
 import React from "react";
-
-const GAMES = [
-  { value: "mega_millions", label: "Mega Millions" },
-  { value: "texas_two_step", label: "Texas Two Step" },
-  { value: "modified_2_step_beta", label: "Modified 2 Step (Beta OCR)" },
-  { value: "lotto_texas", label: "Lotto Texas (TX)" },
-  { value: "powerball", label: "Powerball (TX)" },
-  { value: "cash_five", label: "Cash Five (TX)" },
-  { value: "pick_3", label: "Pick 3 (TX)" },
-  { value: "daily_4", label: "Daily 4 (TX)" },
-  { value: "all_or_nothing", label: "All or Nothing (TX)" },
-];
+import { GAMES, COUNTRIES, REGION_LABELS } from "../config/games.js";
 
 export default function Forms({
   game,
+  country,
+  region,
+  onCountryChange,
+  onRegionChange,
   onGameChange,
   thresholdDivisor,
   onThresholdDivisorChange,
@@ -27,6 +20,13 @@ export default function Forms({
   busy,
   fileInputKey = 0,
 }) {
+  const availableRegions = Array.from(
+    new Set(GAMES.filter((g) => g.country === country).map((g) => g.region))
+  );
+  const availableGames = GAMES.filter(
+    (g) => g.country === country && g.region === region
+  );
+
   return (
     <form
       onSubmit={(e) => {
@@ -43,13 +43,35 @@ export default function Forms({
       }}
     >
       <label style={{ display: "grid", gap: "0.35rem" }}>
+        Country
+        <select value={country} onChange={(e) => onCountryChange(e.target.value)} disabled={busy}>
+          {COUNTRIES.map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label style={{ display: "grid", gap: "0.35rem" }}>
+        State/Region
+        <select value={region} onChange={(e) => onRegionChange(e.target.value)} disabled={busy}>
+          {availableRegions.map((r) => (
+            <option key={r} value={r}>
+              {REGION_LABELS[r] || r}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label style={{ display: "grid", gap: "0.35rem" }}>
         Game
         <select
           value={game}
           onChange={(e) => onGameChange(e.target.value)}
           disabled={busy}
         >
-          {GAMES.map((g) => (
+          {availableGames.map((g) => (
             <option key={g.value} value={g.value}>
               {g.label}
             </option>
@@ -65,9 +87,12 @@ export default function Forms({
               type="number"
               min="1"
               value={thresholdDivisor}
-              onChange={(e) => onThresholdDivisorChange(Number(e.target.value))}
+              onChange={(e) => onThresholdDivisorChange(Math.max(1, Number(e.target.value)))}
               disabled={busy}
             />
+            <small style={{ color: "#555" }}>
+              We divide total draws by this number to get a cutoff. Bigger number = stricter. Smaller = easier.
+            </small>
           </label>
 
           <label style={{ display: "grid", gap: "0.35rem" }}>
@@ -83,38 +108,33 @@ export default function Forms({
         </>
       )}
 
+      <label style={{ display: "grid", gap: "0.35rem" }}>
+        Frequency mode
+        <select
+          value={frequencyMode}
+          onChange={(e) => onFrequencyModeChange(e.target.value)}
+          disabled={busy}
+        >
+          <option value="highest">Highest frequency</option>
+          <option value="lowest">Lowest frequency</option>
+          <option value="random">Random</option>
+        </select>
+      </label>
+
       {enableUploads && (
         <>
           <label style={{ display: "grid", gap: "0.35rem" }}>
-            Frequency mode
-            <select
-              value={frequencyMode}
-              onChange={(e) => onFrequencyModeChange(e.target.value)}
-              disabled={busy}
-            >
-              <option value="highest">Highest frequency</option>
-              <option value="lowest">Lowest frequency</option>
-              <option value="random">Random</option>
-            </select>
-          </label>
-
-          <label style={{ display: "grid", gap: "0.35rem" }}>
             Upload ticket photo
-            <input
-              key={fileInputKey}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onClick={(e) => {
-                // allow selecting the same file again
-                e.target.value = "";
-              }}
-              onChange={(e) => {
-                const first = e.target.files?.[0] ? [e.target.files[0]] : [];
-                onFilesChange(first);
-              }}
-              disabled={busy}
-            />
+              <input
+                key={fileInputKey}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const first = e.target.files?.[0] ? [e.target.files[0]] : [];
+                  onFilesChange(first);
+                }}
+                disabled={busy}
+              />
           </label>
         </>
       )}

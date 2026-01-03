@@ -5,7 +5,8 @@ const OCR_OPTIONS = buildOcrOptions({
   maxNum: 35,
   mainCount: 4,
   bonusCount: 1,
-  playLetters: /^[A-E]/i,
+  playLetters: /^[A-K]/i,
+  maxGroupsPerImage: 10,
 });
 
 export async function parseModified2StepBeta(files) {

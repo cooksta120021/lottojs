@@ -47,15 +47,17 @@ export function buildSuggestions(
   };
 
   const suggestions = [];
-  for (let i = 0; i < sets; i += 1) {
-    const mains =
-      mode === "random"
-        ? randomPick(frequent.main, mainCount)
-        : frequent.main.slice(0, mainCount);
-    const specials =
-      mode === "random"
-        ? randomPick(frequent.special, specialCount)
-        : frequent.special.slice(0, specialCount);
+  const seen = new Set();
+  let attempts = 0;
+  const maxAttempts = sets * 50; // generous cap to avoid infinite loops
+  while (suggestions.length < sets && attempts < maxAttempts) {
+    attempts += 1;
+    const mains = randomPick(frequent.main, mainCount);
+    const specials = randomPick(frequent.special, specialCount);
+    if (mains.length !== mainCount || specials.length !== specialCount) continue;
+    const key = `${mains.join("-")}|${specials.join("-")}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     suggestions.push([...mains, ...specials]);
   }
 

@@ -46,6 +46,19 @@ export default function PoolEditor({ pools, onChange, onApply, busy }) {
   const formatValue = (val) =>
     val === undefined || val === null || Number.isNaN(val) ? "" : val.toString().padStart(2, "0");
 
+  const addPool = () => {
+    const newPool = {
+      id: Date.now(),
+      numbers: [0, 0, 0, 0],
+      special: [0],
+    };
+    onChange([...pools, newPool]);
+  };
+
+  const removePool = (poolId) => {
+    onChange(pools.filter((p) => p.id !== poolId));
+  };
+
   if (!pools.length) return null;
 
   return (
@@ -57,7 +70,12 @@ export default function PoolEditor({ pools, onChange, onApply, busy }) {
             key={pool.id}
             style={{ border: "1px solid #ddd", padding: "0.75rem", borderRadius: "6px" }}
           >
-            <strong>Image #{pool.id + 1}</strong>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <strong>Image #{pool.id + 1}</strong>
+              <button type="button" onClick={() => removePool(pool.id)} disabled={busy}>
+                Remove set
+              </button>
+            </div>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
               {pool.numbers.map((n, idx) => (
                 <div key={idx} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
@@ -68,14 +86,8 @@ export default function PoolEditor({ pools, onChange, onApply, busy }) {
                     disabled={busy}
                     style={{ width: "80px" }}
                   />
-                  <button type="button" onClick={() => removeNumber(pool.id, idx)} disabled={busy}>
-                    ✕
-                  </button>
                 </div>
               ))}
-              <button type="button" onClick={() => addNumber(pool.id)} disabled={busy}>
-                + Add
-              </button>
             </div>
 
             <div style={{ marginTop: "0.5rem" }}>
@@ -105,6 +117,11 @@ export default function PoolEditor({ pools, onChange, onApply, busy }) {
       >
         Apply edits
       </button>
+      <div style={{ marginTop: "0.5rem" }}>
+        <button type="button" onClick={addPool} disabled={busy}>
+          Add new set
+        </button>
+      </div>
     </div>
   );
 }

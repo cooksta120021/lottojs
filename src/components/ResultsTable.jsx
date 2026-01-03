@@ -15,9 +15,9 @@ export default function ResultsTable({ counts }) {
   ];
 
   return (
-    <div style={{ marginTop: "1rem" }}>
-      <h3>Counts</h3>
-      <table border="1" cellPadding="6" style={{ borderCollapse: "collapse" }}>
+    <details style={{ marginTop: "1rem" }} open>
+      <summary style={{ cursor: "pointer", fontWeight: 600 }}>Counts</summary>
+      <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", marginTop: "0.5rem" }}>
         <thead>
           <tr>
             <th>Value</th>
@@ -41,6 +41,6 @@ export default function ResultsTable({ counts }) {
           )}
         </tbody>
       </table>
-    </div>
+    </details>
   );
 }
